@@ -3,11 +3,12 @@ import SpeakerData from './SpeakerData';
 import speakersReducer from './speakersReducer';
 
 function useSpeakerDataManager () {
-    const [{isLoading, speakerList}, dispatch] = useReducer(
+    const [{isLoading, speakerList, favoriteClickCount}, dispatch] = useReducer(
     speakersReducer, // This is the reducer called  with setSpeakerList
     {
       speakerList:[],
-      isLoading: true
+      isLoading: true,
+      favoriteClickCount: 0,
     }); // this is initial data
    
    function toggleSpeakerFavorite (speakerRec) {
@@ -17,6 +18,10 @@ function useSpeakerDataManager () {
        dispatch({type: 'favorite', id: speakerRec.id});
        console.log(speakerRec);
      }
+   }
+
+   function incrementFavoriteClickCount() {
+     dispatch({ type: 'incrementFavoriteClickCount' });
    }
 
   useEffect(() => {
@@ -39,7 +44,7 @@ function useSpeakerDataManager () {
     };
   }, []); // [speakingSunday, speakingSaturday]);
 
-  return { isLoading, speakerList, toggleSpeakerFavorite };
+  return { isLoading, speakerList, toggleSpeakerFavorite, incrementFavoriteClickCount, favoriteClickCount, };
 
  }
 

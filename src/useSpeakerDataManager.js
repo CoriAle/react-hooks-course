@@ -1,23 +1,38 @@
 import React, { useEffect, useReducer} from 'react';
 import SpeakerData from './SpeakerData';
 import speakersReducer from './speakersReducer';
+import axios from 'axios';
 
 function useSpeakerDataManager () {
-    const [{isLoading, speakerList, favoriteClickCount}, dispatch] = useReducer(
+    const [{
+      isLoading, 
+      speakerList, 
+      favoriteClickCount,
+      hasErrored,
+      error,
+    }, dispatch] = useReducer(
     speakersReducer, // This is the reducer called  with setSpeakerList
     {
       speakerList:[],
       isLoading: true,
       favoriteClickCount: 0,
+      hasErrored: false,
+      error: null,
     }); // this is initial data
    
    function toggleSpeakerFavorite (speakerRec) {
-     if(speakerRec.favorite === true) {
-       dispatch({type: 'unfavorite', id: speakerRec.id});
-     } else {
-       dispatch({type: 'favorite', id: speakerRec.id});
-       console.log(speakerRec);
-     }
+      const updateData = async function () {
+       try {
+         axios.put(`http://localhost:4000/speakers/${speakerRec.id}`, speakerRec);
+         speakerRec.favorite === true 
+         ? dispatch({type: 'unfavorite', id: speakerRec.id})
+         : dispatch({type: 'favorite', id: speakerRec.id});
+       } catch(e) {
+         // statements
+         dispatch({type: 'errored', error: e});
+       }
+     };
+     updateData();
    }
 
    function incrementFavoriteClickCount() {
@@ -25,26 +40,30 @@ function useSpeakerDataManager () {
    }
 
   useEffect(() => {
-    new Promise(function (resolve) {
-      setTimeout(function () {
-        resolve();
-      }, 1000);
-    }).then(() => {
-      // const speakerListServerFilter = SpeakerData.filter(({ sat, sun }) => {
-      //   return (speakingSaturday && sat) || (speakingSunday && sun);
-      // });
-      //setSpeakerList(speakerListServerFilter);
-      dispatch({
-        type: "setSpeakerList",
-        data: SpeakerData,
-      });
-    });
+    const fetchData = async function () {
+      try {
+        let result = await axios.get('http://localhost:4000/speakers');
+        dispatch({ type: 'setSpeakerList', data: result.data });
+      } catch (e) {
+        dispatch({ type: 'errored', error: e });
+      }
+    };
+    fetchData();
+
     return () => {
       console.log('cleanup');
     };
-  }, []); // [speakingSunday, speakingSaturday]);
+  }, []);
 
-  return { isLoading, speakerList, toggleSpeakerFavorite, incrementFavoriteClickCount, favoriteClickCount, };
+  return {
+    isLoading,
+    speakerList,
+    toggleSpeakerFavorite,
+    incrementFavoriteClickCount,
+    favoriteClickCount,
+    hasErrored,
+    error,
+  };
 
  }
 

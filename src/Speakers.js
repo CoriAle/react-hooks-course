@@ -16,7 +16,7 @@ const Speakers = ({}) => {
   //const [speakerList, setSpeakerList] = useState([]);
 
   //const { isLoading, speakerList, toggleSpeakerFavorite } = useSpeakerDataManager();
-  const { isLoading, speakerList, toggleSpeakerFavorite } = useContext(GlobalContext);
+  const { isLoading, speakerList, toggleSpeakerFavorite, hasErrored, error } = useContext(GlobalContext);
   const handleChangeSaturday = () => {
     setSpeakingSaturday(!speakingSaturday);
   };
@@ -66,6 +66,7 @@ const Speakers = ({}) => {
   }, []);
 
   if (isLoading) return <div>Loading...</div>;
+  if (hasErrored) return <di>Error: {error.message}</di>;
 
   return (
     <div>
